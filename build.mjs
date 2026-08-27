@@ -45,6 +45,18 @@ async function pullShell() {
     console.log(`Pulled the site shell from ${REPO}@${REF}.`);
 }
 
+/* coverage.json and regulatory.json decide what the site is allowed to offer,
+   so a deployment that assembles itself must not silently ship without them. */
+async function pullConfig() {
+    for (const file of ['data/coverage.json', 'data/regulatory.json']) {
+        if (present(path.join(PUBLIC, file))) continue;
+        await pull(file).catch(() => {
+            throw new Error(`${file} is missing and could not be pulled — refusing to build a site that would `
+                + `treat every state as open or every hospital as waitlist by accident.`);
+        });
+    }
+}
+
 async function pullData() {
     if (present(path.join(DATA, 'index.json')) && present(path.join(DATA, 'search.json'))) {
         const idx = JSON.parse(fs.readFileSync(path.join(DATA, 'index.json'), 'utf8'));
@@ -66,6 +78,7 @@ function rebuildFromCms() {
 
 try {
     await pullShell();
+    await pullConfig();
 } catch (err) {
     console.error('Could not assemble the site shell:', err.message);
     process.exit(1);
