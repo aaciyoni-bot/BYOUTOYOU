@@ -19,6 +19,7 @@ const store = {
 };
 
 function toast(msg) {
+  announce(msg);
   const el = $('#toast');
   el.textContent = msg;
   el.hidden = false;
@@ -459,6 +460,7 @@ function applyFilters() {
 
   app.filtered = rows;
   app.page = 0;
+  announce(`${rows.length} hospitals match`);
   $('#result-count').textContent = rows.length === app.current.hospitals.length
     ? `Showing all ${fmt(rows.length)} hospitals`
     : `${fmt(rows.length)} of ${fmt(app.current.hospitals.length)} hospitals match`;
@@ -564,8 +566,10 @@ function openHospital(id, stateCode) {
     <p class="d-note">Hospital details come from the public CMS Hospital General Information dataset. byoutoyou is an independent
       personal-care service and is not affiliated with, or endorsed by, this hospital. Visits always depend on the unit's approval.</p>`;
 
+  lastFocus = document.activeElement;
   $('#drawer').hidden = false;
   document.body.style.overflow = 'hidden';
+  setTimeout(() => $('#drawer .drawer-close').focus(), 40);
   $('#drawer [data-book-drawer]').onclick = () => { closeDrawer(); openBooking(h, state); };
   $('#drawer [data-save-drawer]').onclick = e => { toggleSave(h, state); e.target.textContent = isSaved(h.id) ? 'Saved ✓' : 'Save'; };
   $('#drawer [data-share-drawer]').onclick = () => shareHospital(h, state);
@@ -579,6 +583,7 @@ function openHospital(id, stateCode) {
 function closeDrawer() {
   $('#drawer').hidden = true;
   document.body.style.overflow = '';
+  if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
 }
 
 /* ------------------------------------------------------------------ save / compare */
@@ -801,14 +806,20 @@ function renderBookingSummary() {
 function validateStep(n) {
   let ok = true;
   const need = n === 1 ? [] : n === 2 ? ['#bk-patient'] : ['#bk-name', '#bk-email', '#bk-phone'];
+  let fieldsBad = false;
   need.forEach(sel => {
     const el = $(sel);
     const bad = !el.value.trim() || (el.type === 'email' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(el.value));
     el.classList.toggle('err', bad);
-    if (bad) ok = false;
+    if (bad) { ok = false; fieldsBad = true; }
   });
+  if (fieldsBad) toast('Please complete the highlighted fields');
   if (n === 1 && !chosenServices().length) { toast('Pick at least one service'); ok = false; }
-  if (!ok && need.length) toast('Please complete the highlighted fields');
+  if (n === 3) {
+    const agreed = $('#bk-agree').checked;
+    $('#bk-agree').closest('.consent').classList.toggle('err', !agreed);
+    if (!agreed) { toast('Please confirm you have read the terms'); ok = false; }
+  }
   return ok;
 }
 
@@ -834,6 +845,7 @@ function submitBooking(e) {
     phone: $('#bk-phone').value.trim(),
     total,
     waitlist: !!app.bookingWaitlist,
+    acceptedTerms: new Date().toISOString(),
     created: new Date().toISOString().slice(0, 10)
   };
 
@@ -863,7 +875,9 @@ function submitBooking(e) {
     '',
     `Requested by: ${req.name} (${req.relationship})`,
     `Email: ${req.email}`,
-    `Phone: ${req.phone}`
+    `Phone: ${req.phone}`,
+    '',
+    `Terms of Service accepted: ${req.acceptedTerms}`
   ].filter(Boolean).join('\n');
 
   const subject = (app.bookingWaitlist ? 'Waitlist — ' : 'Bedside visit request — ') + req.hospital;
@@ -1069,6 +1083,9 @@ function submitPro(e) {
     el.classList.toggle('err', bad);
     if (bad) ok = false;
   });
+  const agreed = $('#pro-agree').checked;
+  $('#pro-agree').closest('.consent').classList.toggle('err', !agreed);
+  if (!agreed) { toast('Please confirm you accept the Professional Agreement'); ok = false; }
   if (!ok) { toast('Please complete the highlighted fields'); return; }
   const services = $$('#pro-services input:checked').map(i => SERVICES.find(s => s.id === i.value)?.name).filter(Boolean);
   const body = [
@@ -1082,7 +1099,10 @@ function submitPro(e) {
     `Email: ${$('#pro-email').value.trim()}`,
     `Phone: ${$('#pro-phone').value.trim()}`,
     '',
-    'I understand visits are offered only inside my declared radius.'
+    '',
+    `Professional Agreement accepted: ${new Date().toISOString()}`,
+    'Confirmed: independent contractor, licensed, insured, no clinical care, no circumvention,',
+    'and visits only inside the declared radius.'
   ].join('\n');
   $('#pro-mail').href = `mailto:pros@byoutoyou.com?subject=${encodeURIComponent('Professional application — ZIP ' + $('#pro-zip').value.trim())}&body=${encodeURIComponent(body)}`;
   $('#pro-done-text').textContent = `We will verify your licence and insurance, then open the hospitals within ${$('#pro-radius').value} of ${$('#pro-zip').value.trim()}.`;
@@ -1108,11 +1128,56 @@ async function shareHospital(h, state) {
    the booking form, the waitlist suggests covered hospitals nearby, and the
    keyboard map is bound in bindExtraKeys(). ------------------------------- */
 
+/* Dialogs have to behave like dialogs: focus moves in, Tab stays inside, and
+   closing hands focus back to whatever opened them. */
+let lastFocus = null;
+
+function focusablesIn(root) {
+  return $$('a[href],button:not([disabled]),input:not([type="hidden"]),select,textarea,[tabindex]:not([tabindex="-1"])', root)
+    .filter(el => el.offsetParent !== null || el === document.activeElement);
+}
+
 function openModal(sel) {
-  $(sel).hidden = false;
+  lastFocus = document.activeElement;
+  const box = $(sel);
+  box.hidden = false;
   document.body.style.overflow = 'hidden';
-  const focusable = $(sel).querySelector('input,select,textarea,button:not(.modal-close)');
-  if (focusable) setTimeout(() => focusable.focus(), 30);
+  const first = box.querySelector('input,select,textarea,button:not(.modal-close)') || box.querySelector('button');
+  if (first) setTimeout(() => first.focus(), 30);
+}
+
+function closeTopOverlay() {
+  const open = $$('.modal,.palette,.drawer').find(m => !m.hidden);
+  if (!open) return false;
+  open.hidden = true;
+  document.body.style.overflow = '';
+  if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+  return true;
+}
+
+function trapFocus(e) {
+  if (e.key !== 'Tab') return;
+  const open = $$('.modal,.palette,.drawer').find(m => !m.hidden);
+  if (!open) return;
+  const items = focusablesIn(open);
+  if (!items.length) return;
+  const first = items[0], last = items[items.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+}
+
+/* Screen readers need to hear what sighted users see change. */
+function announce(msg) {
+  let live = $('#live-region');
+  if (!live) {
+    live = document.createElement('p');
+    live.id = 'live-region';
+    live.className = 'sr-only';
+    live.setAttribute('role', 'status');
+    live.setAttribute('aria-live', 'polite');
+    document.body.appendChild(live);
+  }
+  live.textContent = msg;
 }
 
 function nearestCovered(h, limit = 3) {
@@ -1198,16 +1263,15 @@ function bindEvents() {
     }
   });
 
+  document.addEventListener('keydown', trapFocus);
+
   document.addEventListener('keydown', e => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openPalette('search'); return; }
     if (e.key === 'Escape') {
       if (!$('#palette').hidden) closePalette();
       else if (!$('#drawer').hidden) closeDrawer();
       else if (!$('#booking').hidden) closeBooking();
-      else {
-        const open = $$('.modal').find(m => !m.hidden);
-        if (open) { open.hidden = true; document.body.style.overflow = ''; }
-      }
+      else closeTopOverlay();
       return;
     }
     const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);

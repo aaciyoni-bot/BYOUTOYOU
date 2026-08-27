@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accessibility — byoutoyou</title>
+<meta name="description" content="byoutoyou targets WCAG 2.1 AA — what is in place and how to report a problem.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://byoutoyou.com/legal/accessibility">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Comfortaa:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<header id="site-header"><div class="container header-in">
+  <a class="logo" href="/"><span class="wordmark">by<b>ou</b>to<i>you</i></span><small>bedside beauty care</small></a>
+  <div class="header-actions"><a class="btn btn-primary btn-sm" href="/#/states">Find a hospital</a></div>
+</div></header>
+<main class="container narrow legal">
+  <nav class="crumbs"><a href="/">Home</a><span>/</span><b>Accessibility</b></nav>
+  <p class="legal-updated">Last updated 27 August 2026</p>
+  <h1>Accessibility</h1>
+  <p class="lede">This site exists for people having one of the worst weeks of their life, often reading it one-handed in
+     a hospital corridor. It should work with a screen reader, a keyboard, and no mouse at all.</p>
+
+  <h2>What we aim for</h2>
+  <p>We target <strong>WCAG 2.1 Level AA</strong>, the standard the U.S. Department of Justice points to under the Americans
+     with Disabilities Act, and the level required of state and local government entities — including public hospitals —
+     under the DOJ's 2024 web accessibility rule.</p>
+
+  <h2>What is in place</h2>
+  <ul>
+    <li>Every function reachable by keyboard, with a visible focus outline and a skip link to the main content.</li>
+    <li>Search, filters, dialogs and the hospital list are announced to screen readers, and dialogs return focus when closed.</li>
+    <li>The map is decorative: every state on it is also a plain link in the footer and on the states page, and each
+        state has its own text page listing every hospital.</li>
+    <li>Text meets AA contrast in both light and dark themes; nothing depends on colour alone.</li>
+    <li>Motion respects <code>prefers-reduced-motion</code>; nothing flashes or auto-plays.</li>
+    <li>Pages resize and reflow to 200% and to a 320px viewport without horizontal scrolling.</li>
+  </ul>
+
+  <h2>Known gaps</h2>
+  <p>The interactive map conveys density visually; the equivalent information is in the state list, but the map itself is
+     not a substitute for it. We are working on a text summary of coverage per state.</p>
+
+  <h2>Tell us</h2>
+  <p>If anything here blocked you, write to <a href="mailto:accessibility@byoutoyou.com">accessibility@byoutoyou.com</a>
+     with the page and what happened. We treat access problems as bugs and fix them in the same queue.</p>
+</main>
+<footer><div class="container footer-note">
+  <nav class="legal-nav">
+    <a href="/legal/terms">Terms of Service</a>
+    <a href="/legal/professional-agreement">Professional Agreement</a>
+    <a href="/legal/privacy">Privacy</a>
+    <a href="/legal/accessibility">Accessibility</a>
+  </nav>
+  <p>byoutoyou provides personal-care services only. It gives no medical advice and performs no clinical care.
+     Every visit depends on the hospital's own policy and the care team's approval.</p>
+  <p class="copy">© 2026 byoutoyou</p>
+</div></footer>
+</body>
+</html>

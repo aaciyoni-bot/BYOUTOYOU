@@ -374,6 +374,9 @@
       <a href="#" data-open-gift>Gift a visit</a>
       <a href="#" data-open-pro>Work with us</a>
       <a href="#" data-open-keys>Keyboard</a>
+      <a href="/legal/terms">Terms</a>
+      <a href="/legal/privacy">Privacy</a>
+      <a href="/legal/accessibility">Accessibility</a>
     </nav>
     <nav class="state-links" aria-label="Hospitals by state">
       <h4>Hospitals by state</h4>
@@ -485,6 +488,10 @@
           <div class="field"><label for="bk-phone">Phone</label><input type="tel" id="bk-phone" required></div>
         </div>
         <div class="summary" id="bk-summary"></div>
+        <label class="consent"><input type="checkbox" id="bk-agree">
+          <span>I have read the <a href="/legal/terms" target="_blank" rel="noopener">Terms of Service</a>, and I understand that
+            byoutoyou coordinates the visit but the professional is an independent contractor, that no medical care is
+            provided, and that the visit depends on the hospital unit's approval.</span></label>
       </fieldset>
 
       <div class="bk-actions">
@@ -561,6 +568,10 @@
       </div>
       <p class="privacy-note">We verify licence, insurance and a background check before your first visit, and train on
         hospital etiquette, hand hygiene and isolation precautions.</p>
+      <label class="consent"><input type="checkbox" id="pro-agree">
+        <span>I have read the <a href="/legal/professional-agreement" target="_blank" rel="noopener">Professional Agreement</a>.
+          I am an independent contractor, I hold a current licence and my own liability insurance, I will perform no
+          clinical care, and I will not take platform-introduced patients or hospitals off the platform.</span></label>
       <div class="bk-actions"><span class="grow"></span><button class="btn btn-primary" type="submit">Send application</button></div>
     </form>
     <div id="pro-done" hidden>
