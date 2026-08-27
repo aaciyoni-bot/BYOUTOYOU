@@ -1,0 +1,5 @@
+node_modules/
+public/state/
+public/sitemap.xml
+.vercel
+.DS_Store
