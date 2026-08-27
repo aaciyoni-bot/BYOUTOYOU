@@ -626,3 +626,5 @@ footer{background:var(--surface);border-top:1px solid var(--line);padding:44px 0
 .reg-pill.reg-conditions{background:#faf0dd;color:var(--gold)}
 [data-theme="dark"] .reg-pill.reg-conditions{background:#2e2517}
 .reg-pill.reg-hold{background:var(--brand-soft);color:var(--brand)}
+.legal-note{font-size:.85rem;background:var(--surface-2);border-left:3px solid var(--ink-3);
+  padding:12px 14px;border-radius:0 10px 10px 0;margin:1em 0}
