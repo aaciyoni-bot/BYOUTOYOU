@@ -1177,6 +1177,7 @@ function submitPro(e) {
     `Travel radius: ${$('#pro-radius').value}`,
     `Services: ${services.join(', ') || '—'}`,
     `Languages: ${$('#pro-langs').value.trim() || '—'}`,
+    `Insurer: ${$('#pro-insurer').value.trim() || '—'}`,
     `Experience: ${$('#pro-years').value.trim() || '—'} years`,
     `Email: ${$('#pro-email').value.trim()}`,
     `Phone: ${$('#pro-phone').value.trim()}`,
