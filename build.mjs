@@ -21,7 +21,8 @@ const REPO = process.env.DATA_REPO || 'aaciyoni-bot/BYOUTOYOU';
 const REF = process.env.DATA_REF || 'main';
 const RAW = `https://raw.githubusercontent.com/${REPO}/${REF}/public`;
 
-const SHELL = ['index.html', 'assets/styles.css', 'assets/app.js', 'manifest.webmanifest', 'sw.js', 'robots.txt'];
+const SHELL = ['index.html', 'assets/styles.css', 'assets/app.js', 'manifest.webmanifest', 'sw.js', 'robots.txt',
+    'legal/terms.html', 'legal/professional-agreement.html', 'legal/privacy.html', 'legal/accessibility.html'];
 
 const present = p => fs.existsSync(p) && fs.statSync(p).size > 0;
 
@@ -166,7 +167,8 @@ for (const state of index.states) {
         statePage({ ...state, generated: data.generated }, data.hospitals, index.states));
 }
 
-const urls = [`${SITE}/`, ...index.states.map(s => `${SITE}/state/${s.slug}`)];
+const urls = [`${SITE}/`, `${SITE}/legal/terms`, `${SITE}/legal/privacy`, `${SITE}/legal/accessibility`,
+    `${SITE}/legal/professional-agreement`, ...index.states.map(s => `${SITE}/state/${s.slug}`)];
 fs.writeFileSync(path.join(PUBLIC, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`
     + urls.map(u => `  <url><loc>${u}</loc><lastmod>${index.generated}</lastmod></url>`).join('\n')
