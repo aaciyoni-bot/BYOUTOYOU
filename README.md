@@ -46,7 +46,7 @@ directory from this repo at `DATA_REF`, and if that fails it rebuilds the data
 straight from CMS. That is what lets a deployment be triggered without shipping
 two megabytes of JSON.
 
-**Worth doing once:** connect the Vercel project to this GitHub repository. Then every push deploys, the build finds the files
+**Worth doing once:** connect the Vercel project (`byoutoyou`) to this GitHub repository (`aaciyoni-bot/BYOUTOYOU`). Then every push deploys, the build finds the files
 already on disk and skips the download entirely, and the monthly data refresh
 reaches the live site on its own. Until then, a data refresh only appears after
 the next deployment.

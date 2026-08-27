@@ -17,7 +17,7 @@ import { execFileSync } from 'child_process';
 
 const PUBLIC = path.join(process.cwd(), 'public');
 const DATA = path.join(PUBLIC, 'data');
-const REPO = process.env.DATA_REPO || 'aaciyoni-bot/byoutoyou';
+const REPO = process.env.DATA_REPO || 'aaciyoni-bot/BYOUTOYOU';
 const REF = process.env.DATA_REF || 'main';
 const RAW = `https://raw.githubusercontent.com/${REPO}/${REF}/public`;
 
