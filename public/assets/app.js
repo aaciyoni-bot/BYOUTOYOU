@@ -1179,8 +1179,8 @@ function submitPro(e) {
     '',
     '',
     `Professional Agreement accepted: ${new Date().toISOString()}`,
-    'Confirmed: independent contractor, licensed, insured, no clinical care, no circumvention,',
-    'and visits only inside the declared radius.'
+    'Confirmed: independent contractor, licensed, insured, no clinical care,',
+    'and visits only in a licensed state inside the declared radius.'
   ].join('\n');
   $('#pro-mail').href = `mailto:pros@byoutoyou.com?subject=${encodeURIComponent('Professional application — ZIP ' + $('#pro-zip').value.trim())}&body=${encodeURIComponent(body)}`;
   $('#pro-done-text').textContent = `We will verify your licence and insurance, then open the hospitals within ${$('#pro-radius').value} of ${$('#pro-zip').value.trim()}.`;
