@@ -253,6 +253,10 @@ async function route() {
     await renderState(stateCode);
     if (id) setTimeout(() => openHospital(id, stateCode.toUpperCase()), 120);
     return;
+  } else if (view === 'join') {
+    showView('home');
+    setTimeout(openPro, 120);
+    return;
   } else if (view === 'saved') {
     showView('saved');
     renderSaved();

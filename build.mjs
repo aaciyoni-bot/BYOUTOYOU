@@ -243,7 +243,93 @@ fs.writeFileSync(path.join(PUBLIC, 'legal', 'where-we-operate.html'), `<!DOCTYPE
 `);
 console.log(`Rendered the operating map for ${index.states.length} states.`);
 
-const urls = [`${SITE}/`, `${SITE}/legal/where-we-operate`, `${SITE}/legal/terms`, `${SITE}/legal/privacy`, `${SITE}/legal/accessibility`,
+/* Somewhere to send a professional. Built here so the pay table and the open
+   states can never disagree with what the app actually does. */
+const PAY = [
+    ['Bedside haircut', 75, '40 min'],
+    ['Haircut + wash', 95, '45 min'],
+    ['No-rinse hair wash', 60, '30 min'],
+    ['Shave & beard trim', 55, '30 min'],
+    ['Manicure', 55, '35 min'],
+    ['Wig & headscarf fitting', 120, '60 min'],
+    ['Braids & protective styles', 130, '90 min']
+];
+
+const openStates = index.states.filter(st => ['open', 'conditions'].includes(regFor(st.code).status));
+
+fs.writeFileSync(path.join(PUBLIC, 'pros.html'), `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work with byoutoyou — bedside visits near you</title>
+<meta name="description" content="Licensed beauty and grooming professionals: take paid bedside visits at hospitals inside your own travel radius. No exclusivity, no non-compete, you choose every job.">
+<link rel="canonical" href="${SITE}/pros">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Comfortaa:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<header id="site-header"><div class="container header-in">
+  <a class="logo" href="/"><span class="wordmark">by<b>ou</b>to<i>you</i></span><small>bedside beauty care</small></a>
+  <div class="header-actions"><a class="btn btn-primary btn-sm" href="/#/join">Apply</a></div>
+</div></header>
+
+<main class="container legal">
+  <nav class="crumbs"><a href="/">Home</a><span>/</span><b>Work with us</b></nav>
+  <h1>The client cannot come to your chair</h1>
+  <p class="lede">There are people two miles from your salon who have not seen themselves in a mirror properly for
+     three weeks. You already know how to fix that. byoutoyou finds them, arranges the visit with the unit, handles the
+     money, and sends you a hospital, a room and a time — inside the radius you set, never outside it.</p>
+
+  <h2>What it pays</h2>
+  <div class="table-scroll"><table class="compare-table">
+    <thead><tr><th>Visit</th><th>Client pays</th><th>Time</th></tr></thead>
+    <tbody>${PAY.map(([n, p, d]) => `<tr><td>${esc(n)}</td><td>$${p}</td><td>${esc(d)}</td></tr>`).join('')}</tbody>
+  </table></div>
+  <p>You keep the majority of that; the commission is shown before you accept any job, and there is no fee to join, no
+     subscription, and no charge for a job you decline. Payment reaches you after the visit — never in cash, never from
+     the patient's hands.</p>
+
+  <h2>What we ask</h2>
+  <ul>
+    <li>A current cosmetology, barbering, esthetics or nail licence in the state where you would work.</li>
+    <li>Your own liability insurance, $1M per occurrence.</li>
+    <li>A background check, which we run before your first visit.</li>
+    <li>Personal care only — no clinical work of any kind, and the unit's answer is always final.</li>
+  </ul>
+
+  <h2>What we do not ask</h2>
+  <ul>
+    <li>No exclusivity, no minimum, no shifts. Decline anything, for any reason, with no penalty.</li>
+    <li><strong>No non-compete and no non-solicitation.</strong> A family you meet through us is yours to keep working
+        with, on the platform or off it.</li>
+    <li>No travel outside the radius you declare. We will never offer you a hospital you cannot reach.</li>
+  </ul>
+
+  <h2>Where we are opening</h2>
+  ${openStates.length
+    ? `<p>Cleared to work today: ${openStates.map(st => `<a href="/state/${st.slug}">${esc(st.name)}</a>`).join(' · ')}.</p>`
+    : `<p>We are clearing states one at a time with their cosmetology boards, and taking applications everywhere in the
+       meantime — an application is what tells us where to open next. See
+       <a href="/legal/where-we-operate">where we can operate</a>.</p>`}
+
+  <p style="margin-top:26px"><a class="btn btn-primary" href="/#/join">Apply to serve your area</a></p>
+  <p class="reg-src">Applying takes about two minutes and commits you to nothing. Read the
+     <a href="/legal/professional-agreement">Professional Agreement</a> first if you would rather know exactly what you
+     are agreeing to.</p>
+</main>
+
+<footer><div class="container footer-note">
+  <nav class="legal-nav"><a href="/legal/professional-agreement">Professional Agreement</a><a href="/legal/where-we-operate">Where we operate</a><a href="/legal/privacy">Privacy</a></nav>
+  <p class="copy">© 2026 byoutoyou</p>
+</div></footer>
+</body>
+</html>
+`);
+console.log('Rendered the recruiting page.');
+
+const urls = [`${SITE}/`, `${SITE}/pros`, `${SITE}/legal/where-we-operate`, `${SITE}/legal/terms`, `${SITE}/legal/privacy`, `${SITE}/legal/accessibility`,
     `${SITE}/legal/professional-agreement`, ...index.states.map(s => `${SITE}/state/${s.slug}`)];
 fs.writeFileSync(path.join(PUBLIC, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`
