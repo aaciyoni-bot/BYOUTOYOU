@@ -34,14 +34,20 @@
     <li>Search, filters, dialogs and the hospital list are announced to screen readers, and dialogs return focus when closed.</li>
     <li>The map is decorative: every state on it is also a plain link in the footer and on the states page, and each
         state has its own text page listing every hospital.</li>
-    <li>Text meets AA contrast in both light and dark themes; nothing depends on colour alone.</li>
+    <li>Every colour pair the site renders is measured against AA by <code>tools/check-contrast.mjs</code> in our own
+        repository, in both light and dark themes, including form-control borders under the 3:1 non-text rule. Nothing
+        depends on colour alone.</li>
     <li>Motion respects <code>prefers-reduced-motion</code>; nothing flashes or auto-plays.</li>
     <li>Pages resize and reflow to 200% and to a 320px viewport without horizontal scrolling.</li>
   </ul>
 
   <h2>Known gaps</h2>
-  <p>The interactive map conveys density visually; the equivalent information is in the state list, but the map itself is
-     not a substitute for it. We are working on a text summary of coverage per state.</p>
+  <ul>
+    <li>The interactive map conveys density visually. The same information is in the state list, in the footer links and
+        on each state's own page, but the map itself is not a substitute for them.</li>
+    <li>Our testing is automated plus manual keyboard and screen-reader passes. An independent audit with disabled
+        testers has not been done yet, and we will say so here until it has.</li>
+  </ul>
 
   <h2>Tell us</h2>
   <p>If anything here blocked you, write to <a href="mailto:accessibility@byoutoyou.com">accessibility@byoutoyou.com</a>
@@ -53,6 +59,7 @@
     <a href="/legal/professional-agreement">Professional Agreement</a>
     <a href="/legal/privacy">Privacy</a>
     <a href="/legal/accessibility">Accessibility</a>
+    <a href="/legal/where-we-operate">Where we operate</a>
   </nav>
   <p>byoutoyou provides personal-care services only. It gives no medical advice and performs no clinical care.
      Every visit depends on the hospital's own policy and the care team's approval.</p>

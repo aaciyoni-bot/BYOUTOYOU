@@ -167,7 +167,70 @@ for (const state of index.states) {
         statePage({ ...state, generated: data.generated }, data.hospitals, index.states));
 }
 
-const urls = [`${SITE}/`, `${SITE}/legal/terms`, `${SITE}/legal/privacy`, `${SITE}/legal/accessibility`,
+/* One page that says, per state, whether we may operate there at all — built
+   from data/regulatory.json so it can never drift from what the app enforces. */
+const REG = JSON.parse(fs.readFileSync(path.join(DATA, 'regulatory.json'), 'utf8'));
+const LABEL = { open: 'Open', conditions: 'Conditions apply', hold: 'Not operating', unverified: 'Not opened yet' };
+
+function regFor(code) {
+    const st = (REG.states || {})[code] || REG.default || { status: 'unverified' };
+    const test = (REG.classificationTest?.abc || []).includes(code) ? 'ABC test'
+        : (REG.classificationTest?.abcModified || []).includes(code) ? 'modified ABC' : 'common law';
+    return { ...st, test };
+}
+
+const regRows = index.states.map(st => {
+    const r = regFor(st.code);
+    return `<tr>
+      <td><a href="/state/${st.slug}">${esc(st.name)}</a></td>
+      <td><span class="reg-pill reg-${r.status}">${LABEL[r.status] || r.status}</span></td>
+      <td>${esc(r.test)}</td>
+      <td>${esc(r.note || REG.default.note || '')}${r.sources?.length ? `<br><span class="reg-src">${esc(r.sources.join(' · '))}</span>` : ''}</td>
+    </tr>`;
+}).join('\n');
+
+fs.mkdirSync(path.join(PUBLIC, 'legal'), { recursive: true });
+fs.writeFileSync(path.join(PUBLIC, 'legal', 'where-we-operate.html'), `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where we can operate — byoutoyou</title>
+<meta name="description" content="State by state: whether byoutoyou may take a booking there yet, and what still has to be cleared.">
+<link rel="canonical" href="${SITE}/legal/where-we-operate">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Comfortaa:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+<header id="site-header"><div class="container header-in">
+  <a class="logo" href="/"><span class="wordmark">by<b>ou</b>to<i>you</i></span><small>bedside beauty care</small></a>
+  <div class="header-actions"><a class="btn btn-primary btn-sm" href="/#/states">Find a hospital</a></div>
+</div></header>
+<main class="container legal">
+  <nav class="crumbs"><a href="/">Home</a><span>/</span><b>Where we can operate</b></nav>
+  <p class="legal-updated">Last updated ${esc(REG.updated || index.generated)}</p>
+  <h1>Where we can operate</h1>
+  <p class="lede">Two different things decide whether byoutoyou can take a booking in a state: whether a licensed
+     professional may work outside a salon there, and whether they can be engaged as an independent contractor.
+     A state stays closed until both are answered. Every hospital stays listed either way — you can always join a waitlist.</p>
+  <div class="table-scroll"><table class="compare-table">
+    <thead><tr><th>State</th><th>Status</th><th>Contractor test</th><th>What it turns on</th></tr></thead>
+    <tbody>${regRows}</tbody>
+  </table></div>
+  <p class="reg-src">This is an operating checklist, not legal advice. Each state is confirmed with its cosmetology
+     board, and the contractor question with a US employment attorney, before it moves to open.</p>
+</main>
+<footer><div class="container footer-note">
+  <nav class="legal-nav"><a href="/legal/terms">Terms</a><a href="/legal/professional-agreement">Professional Agreement</a><a href="/legal/privacy">Privacy</a><a href="/legal/accessibility">Accessibility</a></nav>
+  <p class="copy">© 2026 byoutoyou</p>
+</div></footer>
+</body>
+</html>
+`);
+console.log(`Rendered the operating map for ${index.states.length} states.`);
+
+const urls = [`${SITE}/`, `${SITE}/legal/where-we-operate`, `${SITE}/legal/terms`, `${SITE}/legal/privacy`, `${SITE}/legal/accessibility`,
     `${SITE}/legal/professional-agreement`, ...index.states.map(s => `${SITE}/state/${s.slug}`)];
 fs.writeFileSync(path.join(PUBLIC, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`

@@ -1,0 +1,51 @@
+{
+  "updated": "2026-08-27",
+  "_comment": "Whether byoutoyou may operate in a state at all, kept apart from coverage.json (which is about having people there). A market cannot go live in a state whose status is not 'open' — the site keeps it on waitlist regardless of what coverage.json says. Statuses: open = cleared, we may operate; conditions = allowed but something extra is required first; hold = the model itself is at risk here, do not sign anyone; unverified = nobody has checked with that state's board yet, which is where every state starts.",
+  "default": {
+    "status": "unverified",
+    "note": "Nobody has confirmed with this state's cosmetology board that a licensed professional may work at a patient's bedside here, or what that requires. Check before opening a market."
+  },
+  "statuses": {
+    "open": "Cleared. Licensed professionals may work at the bedside and contractor status is not unusually exposed.",
+    "conditions": "Allowed, but a specific requirement has to be met first.",
+    "hold": "Do not open. The employment-classification test in this state puts the whole contractor model at risk.",
+    "unverified": "Not yet checked with the state board."
+  },
+  "states": {
+    "CA": {
+      "status": "hold",
+      "reason": "classification",
+      "note": "California applies the ABC test broadly. Prong B asks whether the work is outside the usual course of the hiring entity's business — bedside beauty visits are precisely byoutoyou's usual course, so a contractor classification is very hard to defend here. Employ through a staffing partner or stay out.",
+      "sources": ["Cal. Lab. Code § 2775 (AB 5 / Dynamex)"]
+    },
+    "MA": {
+      "status": "hold",
+      "reason": "classification",
+      "note": "Massachusetts applies the same strict 'outside the usual course of business' prong as California.",
+      "sources": ["Mass. Gen. Laws ch. 149, § 148B"]
+    },
+    "NJ": {
+      "status": "hold",
+      "reason": "classification",
+      "note": "New Jersey's Department of Labor adopted final ABC-test rules in 2026 codifying how classification is assessed across unemployment, wage and worker-protection law.",
+      "sources": ["N.J.A.C. worker classification rules, adopted 5 May 2026"]
+    },
+    "FL": {
+      "status": "conditions",
+      "reason": "practice",
+      "note": "Florida allows cosmetology services outside a licensed salon when the client cannot come to one because of ill health — which covers a hospital patient — but the arrangement must be made through a licensed salon. byoutoyou needs a licensed salon partner (or its own licence) in Florida before taking a booking.",
+      "sources": ["Fla. Stat. § 477.0263", "Fla. Admin. Code R. 61G5-20.0015"]
+    },
+    "MN": {
+      "status": "conditions",
+      "reason": "practice",
+      "note": "Minnesota requires the practitioner to hold a homebound service permit to work outside a licensed salon. Verify each professional's permit before their first visit.",
+      "sources": ["Minn. R. 2105.0410"]
+    }
+  },
+  "classificationTest": {
+    "abc": ["AK", "AR", "CA", "CT", "DE", "GA", "HI", "IL", "IN", "KS", "LA", "ME", "MD", "MA", "NE", "NV", "NH", "NJ", "NM", "OH", "OR", "RI", "TN", "UT", "VT", "WA", "WV"],
+    "abcModified": ["CO", "ID", "MT", "PA", "WI", "WY"],
+    "note": "Most of the ABC states apply the test only to unemployment insurance, which is survivable; California, Massachusetts and New Jersey apply it broadly, which is not. Treat this as a flag for the attorney conversation, not a verdict."
+  }
+}

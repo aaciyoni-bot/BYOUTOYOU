@@ -316,6 +316,8 @@
         <div class="state-kpis" id="state-kpis"></div>
       </header>
 
+      <div id="state-banner"></div>
+
       <div class="insights" id="state-insights"></div>
 
       <div class="filters">
@@ -377,6 +379,7 @@
       <a href="/legal/terms">Terms</a>
       <a href="/legal/privacy">Privacy</a>
       <a href="/legal/accessibility">Accessibility</a>
+      <a href="/legal/where-we-operate">Where we operate</a>
     </nav>
     <nav class="state-links" aria-label="Hospitals by state">
       <h4>Hospitals by state</h4>
@@ -556,6 +559,10 @@
         <div class="field"><label for="pro-radius">How far you travel</label>
           <select id="pro-radius"><option>15 miles</option><option selected>25 miles</option><option>35 miles</option><option>50 miles</option></select>
         </div>
+      </div>
+      <div class="field"><label for="pro-state">State you are licensed in</label>
+        <select id="pro-state"><option value="">Choose a state…</option></select>
+        <p class="reg-note" id="pro-state-note" hidden></p>
       </div>
       <div class="field"><label>What you offer</label><div class="service-picker" id="pro-services"></div></div>
       <div class="grid-2">

@@ -79,6 +79,7 @@ const app = {
   current: null,      // current state file
   compare: [],
   coverage: null,     // data/coverage.json — the live markets
+  regulatory: null,   // data/regulatory.json — where we are allowed to operate
   bookingHospital: null,
   bookingStep: 1
 };
@@ -116,6 +117,35 @@ async function loadSearch() {
   return app.search;
 }
 
+async function loadRegulatory() {
+  if (app.regulatory) return app.regulatory;
+  try {
+    app.regulatory = await getJSON('data/regulatory.json');
+  } catch {
+    app.regulatory = { default: { status: 'unverified' }, states: {}, classificationTest: {} };
+  }
+  return app.regulatory;
+}
+
+/* Whether byoutoyou may operate in a state at all — separate from whether it
+   has anyone there. A state nobody has cleared stays closed even if a market
+   is added to coverage.json, so an untested jurisdiction cannot go live by
+   accident. */
+function regFor(code) {
+  const reg = app.regulatory;
+  if (!reg) return { status: 'unverified' };
+  const state = (reg.states || {})[code];
+  const base = state || reg.default || { status: 'unverified' };
+  const test = (reg.classificationTest?.abc || []).includes(code) ? 'abc'
+    : (reg.classificationTest?.abcModified || []).includes(code) ? 'abcModified' : null;
+  return { ...base, code, classificationTest: test };
+}
+
+function mayOperate(code) {
+  const status = regFor(code).status;
+  return status === 'open' || status === 'conditions';
+}
+
 async function loadCoverage() {
   if (app.coverage) return app.coverage;
   try {
@@ -135,6 +165,8 @@ async function loadCoverage() {
 function marketFor(hospital) {
   const cov = app.coverage;
   if (!cov || !hospital || hospital.lat == null) return null;
+  const stateCode = hospital.state || app.current?.code;
+  if (stateCode && !mayOperate(stateCode)) return null;
   const fallback = cov.defaultRadiusMiles || 35;
   let best = null;
   for (const m of cov.markets || []) {
@@ -156,8 +188,32 @@ function coverageLine(hospital) {
     return `Served by ${m.pros ? `${m.pros} ` : ''}vetted professional${m.pros === 1 ? '' : 's'} based in ${esc(m.name)} —
       within ${Math.round(m.radiusMiles || app.coverage.defaultRadiusMiles || 35)} miles of this hospital.`;
   }
+  const reg = regFor(hospital.state || app.current?.code || '');
+  if (reg.status === 'hold') {
+    return `byoutoyou is not operating in this state yet. ${esc(reg.note || '')} Join the waitlist and we will tell you if that changes.`;
+  }
+  if (reg.status === 'unverified') {
+    return `We have not opened this state yet — every state has its own rules about a licensed professional working
+      outside a salon, and we clear them one at a time before taking a booking. Join the waitlist and we will tell you
+      when this one opens.`;
+  }
+  if (reg.status === 'conditions') {
+    return `This state is open to us once a specific requirement is met: ${esc(reg.note || '')} Until then, waitlist only.`;
+  }
   return `No local professional here yet. We only send someone who lives near the hospital, never from another
     state or region, so this one takes a waitlist request until we have pros on the ground in the area.`;
+}
+
+const STATUS_LABEL = { open: 'Open', conditions: 'Conditions apply', hold: 'Not operating', unverified: 'Not opened yet' };
+
+function stateStatusBanner(code) {
+  const reg = regFor(code);
+  if (reg.status === 'open') return '';
+  return `<div class="reg-banner reg-${esc(reg.status)}">
+    <b>${esc(STATUS_LABEL[reg.status] || reg.status)}</b>
+    <p>${esc(reg.note || '')}${reg.sources?.length ? ` <span class="reg-src">${esc(reg.sources.join(' · '))}</span>` : ''}</p>
+    <p class="reg-src">Hospitals here stay listed, and you can join a waitlist — we simply do not take bookings until the state is cleared.</p>
+  </div>`;
 }
 
 /* ------------------------------------------------------------------ router */
@@ -406,6 +462,8 @@ async function renderState(codeOrSlug) {
   try { data = await loadState(meta.code); }
   catch { list.innerHTML = '<div class="empty"><p>Could not load this state right now.</p></div>'; return; }
   app.current = data;
+  const banner = $('#state-banner');
+  if (banner) banner.innerHTML = stateStatusBanner(meta.code);
   renderInsights();
 
   const cities = [...new Set(data.hospitals.map(h => h.city))].sort();
@@ -1067,9 +1125,28 @@ function submitGift(e) {
 function openPro() {
   $('#pro-services').innerHTML = SERVICES.slice(0, 8).map(s =>
     `<label class="sp"><input type="checkbox" value="${s.id}"><span>${esc(s.name)}</span></label>`).join('');
+  const states = app.index?.states || [];
+  $('#pro-state').innerHTML = '<option value="">Choose a state…</option>'
+    + states.map(st => `<option value="${st.code}">${esc(st.name)}</option>`).join('');
   $('#pro-form').hidden = false;
   $('#pro-done').hidden = true;
   openModal('#pro-modal');
+}
+
+/* A professional in a state we cannot operate in deserves to hear it now,
+   not after they have paid for a background check. */
+function proStateNote() {
+  const code = $('#pro-state').value;
+  const note = $('#pro-state-note');
+  if (!code) { note.hidden = true; return; }
+  const reg = regFor(code);
+  note.hidden = false;
+  note.className = `reg-note reg-${reg.status}`;
+  note.textContent =
+    reg.status === 'open' ? 'Open — we can put you to work here as soon as you are verified.'
+    : reg.status === 'conditions' ? `Open with a condition: ${reg.note || ''}`
+    : reg.status === 'hold' ? `We are not taking on professionals here yet. ${reg.note || ''} Apply anyway and we will contact you if that changes.`
+    : 'We have not opened this state yet. Applying puts you first in line when we do.';
 }
 
 function submitPro(e) {
@@ -1092,6 +1169,7 @@ function submitPro(e) {
     `Name: ${$('#pro-name').value.trim()}`,
     `State licence: ${$('#pro-license').value.trim()}`,
     `Home ZIP: ${$('#pro-zip').value.trim()}`,
+    `Licensed in: ${$('#pro-state').value || '—'} (state status: ${regFor($('#pro-state').value).status})`,
     `Travel radius: ${$('#pro-radius').value}`,
     `Services: ${services.join(', ') || '—'}`,
     `Languages: ${$('#pro-langs').value.trim() || '—'}`,
@@ -1334,6 +1412,7 @@ function bindEvents() {
   $('#bk-back').addEventListener('click', () => showBookingStep(app.bookingStep - 1));
   $('#booking-form').addEventListener('submit', submitBooking);
   $('#pro-form').addEventListener('submit', submitPro);
+  $('#pro-state').addEventListener('change', proStateNote);
   $('#gift-form').addEventListener('submit', submitGift);
   ['#bk-repeat', '#bk-lang'].forEach(sel => $(sel).addEventListener('change', () => {
     if (app.bookingStep === 3) renderBookingSummary();
@@ -1362,7 +1441,7 @@ async function boot() {
   $('[data-year]').textContent = new Date().getFullYear();
 
   try { await loadIndex(); } catch { /* directory rebuilding — views degrade gracefully */ }
-  await loadCoverage();
+  await Promise.all([loadCoverage(), loadRegulatory()]);
   loadSearch().catch(() => { /* only needed once search or a waitlist runs */ });
   renderStats();
   renderMap();
