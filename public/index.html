@@ -137,7 +137,7 @@
       <div class="container stats-in">
         <div class="stat"><b data-count-to="5400" data-stat-total>—</b><span>hospitals listed</span></div>
         <div class="stat"><b data-count-to="50">—</b><span>states + DC &amp; territories</span></div>
-        <div class="stat"><b data-count-to="12">—</b><span>bedside services</span></div>
+        <div class="stat"><b data-count-to="12" data-service-count>—</b><span>bedside services</span></div>
         <div class="stat"><b>24/7</b><span>request line</span></div>
       </div>
     </div>
@@ -455,6 +455,14 @@
           <label>Services</label>
           <div class="service-picker" id="service-picker"></div>
         </div>
+        <div class="clearance-box" id="bk-clearance" hidden>
+          <h4>This one needs the care team first</h4>
+          <p><b id="bk-clearance-list"></b> can be unsafe depending on the patient's condition — blood clots, a low
+             platelet count, blood thinners, lymphoedema or fragile skin all change the answer. We will confirm with the
+             unit ourselves before anyone is dispatched.</p>
+          <label class="consent"><input type="checkbox" id="bk-cleared">
+            <span>I understand this service only goes ahead if the patient's care team approves it, and that they may say no.</span></label>
+        </div>
         <div class="grid-2">
           <div class="field"><label for="bk-date">Preferred date</label><input type="date" id="bk-date" required></div>
           <div class="field"><label for="bk-repeat">Frequency</label>
@@ -577,6 +585,7 @@
         <select id="pro-state"><option value="">Choose a state…</option></select>
         <p class="reg-note" id="pro-state-note" hidden></p>
       </div>
+      <div class="field"><label>Which licence do you hold?</label><div class="service-picker" id="pro-licence"></div></div>
       <div class="field"><label>What you offer</label><div class="service-picker" id="pro-services"></div></div>
       <div class="grid-2">
         <div class="field"><label for="pro-insurer">Your liability insurer</label><input id="pro-insurer" placeholder="e.g. Elite Beauty Society, Babylon"></div>

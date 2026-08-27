@@ -40,19 +40,57 @@ function milesBetween(a, b, c, d) {
 }
 
 /* ------------------------------------------------------------------ content */
+/* Every service carries the licence that may legally perform it. A cosmetology
+   licence covers limited scalp, neck, face and shoulder work as part of a hair
+   or facial service — it does not cover therapeutic massage, which is a
+   separate licence and a separate board in every state. Anything with
+   clearance:true is not offered until the care team has approved that specific
+   service for that specific patient. */
+const LICENCES = {
+  cosmetology: 'Cosmetology licence',
+  barber: 'Barbering licence',
+  nails: 'Nail technician licence',
+  esthetics: 'Esthetics licence',
+  massage: 'Massage therapy licence (LMT)'
+};
+
 const SERVICES = [
-  { id: 'cut', emoji: '✂️', name: 'Bedside haircut', desc: 'Dry cut done seated or lying down, with a clip-on cape and full clean-up.', price: 75, dur: '40 min' },
-  { id: 'wash', emoji: '💧', name: 'No-rinse hair wash', desc: 'Basin-free wash and blow-dry that works with limited mobility.', price: 60, dur: '30 min' },
-  { id: 'cutwash', emoji: '💇', name: 'Haircut + wash', desc: 'The most requested visit: wash, cut and gentle style in one session.', price: 95, dur: '45 min' },
-  { id: 'shave', emoji: '🪒', name: 'Shave & beard trim', desc: 'Hot-towel shave or beard shaping, adapted around lines and tubing.', price: 55, dur: '30 min' },
-  { id: 'mani', emoji: '💅', name: 'Manicure', desc: 'Nail care with hospital-grade sterilised tools; polish optional.', price: 55, dur: '35 min' },
-  { id: 'pedi', emoji: '🦶', name: 'Comfort pedicure', desc: 'Non-invasive nail and skin care for bed-bound patients.', price: 70, dur: '45 min' },
-  { id: 'facial', emoji: '🌿', name: 'Gentle facial', desc: 'Fragrance-free cleanse and hydration for skin dried out by a long stay.', price: 80, dur: '40 min' },
-  { id: 'makeup', emoji: '✨', name: 'Discharge-day makeup', desc: 'Light, natural makeup for going-home photos or a family visit.', price: 85, dur: '40 min' },
-  { id: 'wig', emoji: '👒', name: 'Wig & headscarf fitting', desc: 'Fitting, trimming and styling, including oncology headwear.', price: 120, dur: '60 min' },
-  { id: 'scalp', emoji: '🫧', name: 'Scalp & hand massage', desc: 'Ten quiet minutes of pressure-free touch. Cleared with nursing first.', price: 45, dur: '25 min' },
-  { id: 'braid', emoji: '🧶', name: 'Braids & protective styles', desc: 'Long-wear styles that stay neat through a multi-week admission.', price: 130, dur: '90 min' },
-  { id: 'partner', emoji: '👨‍👩‍👧', name: 'Caregiver add-on', desc: 'Any service for the family member who has not left the room in days.', price: 45, dur: '30 min' }
+  { id: 'cut', emoji: '✂️', name: 'Bedside haircut', licence: 'cosmetology', price: 75, dur: '40 min',
+    desc: 'Dry cut done seated or lying down, with a clip-on cape and full clean-up.' },
+  { id: 'cutwash', emoji: '💇', name: 'Haircut + wash', licence: 'cosmetology', price: 95, dur: '45 min',
+    desc: 'The most requested visit: wash, cut and gentle style in one session.' },
+  { id: 'wash', emoji: '💧', name: 'No-rinse hair wash', licence: 'cosmetology', price: 60, dur: '30 min',
+    desc: 'Basin-free wash and blow-dry that works with limited mobility.' },
+  { id: 'detangle', emoji: '🪮', name: 'Dry shampoo & detangle', licence: 'cosmetology', price: 50, dur: '30 min',
+    desc: 'For a third week in bed, when hair has matted at the back of the head. Slow, painless, no pulling.' },
+  { id: 'shave', emoji: '🪒', name: 'Shave & beard trim', licence: 'barber', price: 55, dur: '30 min',
+    desc: 'Hot-towel shave or beard shaping, adapted around lines and tubing.' },
+  { id: 'headshave', emoji: '🌱', name: 'Head shave, on your terms', licence: 'barber', price: 65, dur: '40 min',
+    desc: 'Taking it off before treatment does, with whoever you want in the room. Unhurried, and the clippings are yours to keep or not.' },
+  { id: 'braid', emoji: '🧶', name: 'Braids & protective styles', licence: 'cosmetology', price: 130, dur: '90 min',
+    desc: 'Long-wear styles that stay neat through a multi-week admission.' },
+  { id: 'wig', emoji: '👒', name: 'Wig & headscarf fitting', licence: 'cosmetology', price: 120, dur: '60 min',
+    desc: 'Fitting, trimming and styling, including oncology headwear.' },
+  { id: 'mani', emoji: '💅', name: 'Manicure', licence: 'nails', price: 55, dur: '35 min',
+    desc: 'Nail care with hospital-grade sterilised tools; polish optional. Hand massage included as part of the service.',
+    note: 'Filed, not cut, for anyone with diabetes or neuropathy — and never without the nurse\'s go-ahead.' },
+  { id: 'pedi', emoji: '🦶', name: 'Comfort pedicure', licence: 'nails', price: 70, dur: '45 min',
+    desc: 'Non-invasive nail and skin care for bed-bound patients.',
+    note: 'Filing and moisturising only. Cutting a diabetic or neuropathic patient\'s toenails is a podiatrist\'s job, not ours.' },
+  { id: 'preop', emoji: '🧴', name: 'Pre-op polish removal', licence: 'nails', price: 35, dur: '20 min',
+    desc: 'Surgery tomorrow and gel that will not come off? Removed properly, so the pulse oximeter reads and nobody argues with you at 6am.' },
+  { id: 'facial', emoji: '🌿', name: 'Gentle facial', licence: 'esthetics', price: 80, dur: '40 min',
+    desc: 'Fragrance-free cleanse and hydration for skin dried out by a long stay.' },
+  { id: 'brows', emoji: '🖌️', name: 'Brows & lashes after chemo', licence: 'esthetics', price: 70, dur: '45 min',
+    desc: 'Drawing brows back on, and teaching you to do it yourself in the mirror afterwards.' },
+  { id: 'makeup', emoji: '✨', name: 'Discharge-day makeup', licence: 'cosmetology', price: 85, dur: '40 min',
+    desc: 'Light, natural makeup for going-home photos or a family visit.' },
+  { id: 'massage', emoji: '🫧', name: 'Oncology massage', licence: 'massage', price: 95, dur: '45 min',
+    clearance: true,
+    desc: 'Light-pressure massage by a licensed massage therapist with oncology training — a different profession from the rest of this list, and a different licence.',
+    note: 'Only after the care team clears it. Blood clots, a low platelet count, blood thinners, lymphoedema, fragile skin and radiation sites all change what is safe, and some of them make massage dangerous.' },
+  { id: 'partner', emoji: '👨‍👩‍👧', name: 'Caregiver add-on', licence: 'cosmetology', price: 45, dur: '30 min',
+    desc: 'Any service above for the family member who has not left the room in days.' }
 ];
 
 const FAQS = [
@@ -275,12 +313,15 @@ async function route() {
 /* ------------------------------------------------------------------ home */
 function renderServices() {
   $('#services-grid').innerHTML = SERVICES.map(s => `
-    <article class="service">
+    <article class="service${s.clearance ? ' service-clearance' : ''}">
       <div class="emoji" aria-hidden="true">${s.emoji}</div>
       <h3>${esc(s.name)}</h3>
       <p>${esc(s.desc)}</p>
+      ${s.note ? `<p class="service-note">${esc(s.note)}</p>` : ''}
       <div class="meta"><span class="price">$${s.price}</span><span class="dur">${esc(s.dur)}</span></div>
+      <div class="service-lic">${esc(LICENCES[s.licence])}${s.clearance ? ' · care-team clearance' : ''}</div>
     </article>`).join('');
+  $$('[data-service-count]').forEach(el => { el.dataset.countTo = String(SERVICES.length); });
 }
 
 function renderFaq() {
@@ -827,7 +868,8 @@ function openBooking(h, stateCode) {
     : 'General enquiry — we will help you find the hospital';
   $('#bk-submit').textContent = app.bookingWaitlist ? 'Join the waitlist' : 'Send request';
   $('#service-picker').innerHTML = SERVICES.map(s => `
-    <label class="sp"><input type="checkbox" value="${s.id}"><span>${esc(s.name)}</span><span class="sp-price">$${s.price}</span></label>`).join('');
+    <label class="sp${s.clearance ? ' sp-clearance' : ''}" title="${esc(LICENCES[s.licence])}${s.clearance ? ' — needs care-team clearance' : ''}">
+      <input type="checkbox" value="${s.id}"><span>${esc(s.name)}</span><span class="sp-price">$${s.price}</span></label>`).join('');
   const d = new Date(Date.now() + 864e5);
   $('#bk-date').value = d.toISOString().slice(0, 10);
   $('#bk-date').min = new Date().toISOString().slice(0, 10);
@@ -877,6 +919,20 @@ function validateStep(n) {
   });
   if (fieldsBad) toast('Please complete the highlighted fields');
   if (n === 1 && !chosenServices().length) { toast('Pick at least one service'); ok = false; }
+  if (n === 1) {
+    const needsClearance = chosenServices().filter(x => x.clearance);
+    const box = $('#bk-clearance');
+    box.hidden = !needsClearance.length;
+    if (needsClearance.length) {
+      $('#bk-clearance-list').textContent = needsClearance.map(x => x.name).join(', ');
+      const cleared = $('#bk-cleared').checked;
+      box.classList.toggle('err', !cleared);
+      if (!cleared) {
+        toast('This service needs the care team to approve it first');
+        ok = false;
+      }
+    }
+  }
   if (n === 3) {
     const agreed = $('#bk-agree').checked;
     $('#bk-agree').closest('.consent').classList.toggle('err', !agreed);
@@ -929,6 +985,8 @@ function submitBooking(e) {
     `Estimated total: $${req.total}`,
     `Preferred: ${req.date}, ${req.window}`,
     `Frequency: ${req.repeat}`,
+    chosenServices().some(x => x.clearance)
+      ? 'Care team has approved the clearance-gated service(s) — confirm with the unit before dispatch.' : '',
     `Language needed: ${req.language}`,
     '',
     `Patient: ${req.patient}`,
@@ -1127,8 +1185,9 @@ function submitGift(e) {
 
 /* --- 5. the professional application that fills coverage ----------------- */
 function openPro() {
-  $('#pro-services').innerHTML = SERVICES.slice(0, 8).map(s =>
-    `<label class="sp"><input type="checkbox" value="${s.id}"><span>${esc(s.name)}</span></label>`).join('');
+  $('#pro-licence').innerHTML = Object.entries(LICENCES).map(([id, label]) =>
+    `<label class="sp"><input type="checkbox" value="${esc(id)}"><span>${esc(label)}</span></label>`).join('');
+  renderProServices();
   const states = app.index?.states || [];
   $('#pro-state').innerHTML = '<option value="">Choose a state…</option>'
     + states.map(st => `<option value="${st.code}">${esc(st.name)}</option>`).join('');
@@ -1153,6 +1212,17 @@ function proStateNote() {
     : 'We have not opened this state yet. Applying puts you first in line when we do.';
 }
 
+/* Show a professional only the work her licence actually covers — a
+   cosmetologist offering therapeutic massage is practising without a licence,
+   and the platform should not be the one that let her. */
+function renderProServices() {
+  const held = $$('#pro-licence input:checked').map(i => i.value);
+  const list = SERVICES.filter(s => held.includes(s.licence));
+  $('#pro-services').innerHTML = held.length
+    ? list.map(s => `<label class="sp"><input type="checkbox" value="${s.id}"><span>${esc(s.name)}</span></label>`).join('')
+    : '<p class="privacy-note">Choose your licence above and the services it covers will appear here.</p>';
+}
+
 function submitPro(e) {
   e.preventDefault();
   const need = ['#pro-name', '#pro-license', '#pro-zip', '#pro-email', '#pro-phone'];
@@ -1174,6 +1244,7 @@ function submitPro(e) {
     `State licence: ${$('#pro-license').value.trim()}`,
     `Home ZIP: ${$('#pro-zip').value.trim()}`,
     `Licensed in: ${$('#pro-state').value || '—'} (state status: ${regFor($('#pro-state').value).status})`,
+    `Licence type: ${$$('#pro-licence input:checked').map(i => LICENCES[i.value]).join(', ') || '—'}`,
     `Travel radius: ${$('#pro-radius').value}`,
     `Services: ${services.join(', ') || '—'}`,
     `Languages: ${$('#pro-langs').value.trim() || '—'}`,
@@ -1418,11 +1489,18 @@ function bindEvents() {
   $('#booking-form').addEventListener('submit', submitBooking);
   $('#pro-form').addEventListener('submit', submitPro);
   $('#pro-state').addEventListener('change', proStateNote);
+  $('#pro-licence').addEventListener('change', renderProServices);
   $('#gift-form').addEventListener('submit', submitGift);
   ['#bk-repeat', '#bk-lang'].forEach(sel => $(sel).addEventListener('change', () => {
     if (app.bookingStep === 3) renderBookingSummary();
   }));
-  $('#service-picker').addEventListener('change', () => { if (app.bookingStep === 3) renderBookingSummary(); });
+  $('#service-picker').addEventListener('change', () => {
+    const needsClearance = chosenServices().filter(x => x.clearance);
+    const box = $('#bk-clearance');
+    box.hidden = !needsClearance.length;
+    if (needsClearance.length) $('#bk-clearance-list').textContent = needsClearance.map(x => x.name).join(', ');
+    if (app.bookingStep === 3) renderBookingSummary();
+  });
 }
 
 function askLocationForSort() {
